@@ -1,0 +1,128 @@
+<style>
+.chip {
+  background: #dedede;
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin: 0 2px 10px 0;
+  text-transform: capitalize;
+}
+.chip .remove{
+  color: #fff;
+  border: none;
+  background: rgba(0,0,0,.87);
+  opacity: 0.54;
+  border-radius: 10px;
+  height: 20px;
+  font-size: 15px;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+.domain-item {
+  cursor: pointer;
+  color: #2780e3;
+  text-transform: capitalize;
+  margin: 0 10px 10px 0;
+  display: inline-block;
+}
+</style>
+<div class="row" style="margin: 20px">
+<div id="disp-msg"></div>
+<form class="form-horizontal" id="new-org-form">
+<fieldset class="col-md-12">
+<div class="form-group">
+            <label for="orgName">Organization Name</label>
+            <input id="orgName" class="form-control" type="text" placeholder="Organization Name" maxlength="100">
+  </div>
+  <div class="form-group">
+            <label for="location">Location</label>
+            <input id="location" class="form-control" type="text" placeholder="Location"  maxlength="20">
+  </div>
+
+<div class="form-group">
+          <label for="state">State</label>
+          <select id="state" class="form-control">
+          </select>
+        </div>
+        
+        <div class="select-block form-group" style="margin-top: 20px;">
+          <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px">Selected Domains</div>
+          <div id="selected-domains" style="display: inline-block;"></div>
+        </div>
+        
+        <div class="select-block form-group" style="margin-top: 20px;">
+          <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px">Available Domains</div>
+          <div id="available-domains" style="display: inline-block;">
+           <? var allDomains = getDomainList();
+           for(var i=0; i<allDomains.length; i++){ ?>
+             <span class="domain-item"><?= allDomains[i][0] ?></span>
+           <? } ?>
+          </div>
+        </div>
+
+        <div class="" style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" id="create-org">Create Organization Page</button>
+        </div>
+        </fieldset>
+</form>
+</div>
+<script>
+var STATES = ['All India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam',
+    'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
+    'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
+    'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttarakhand',
+    'Uttar Pradesh', 'West Bengal', 'Delhi', 'Puducherry']
+    
+STATES.map(function(item){
+  $('#state').append('<option value="' + item + '">' + item + '</option>');
+});
+
+var selectedList = [];
+var removeItem = function(key) {
+  selectedList.splice(key, 1);
+  updateSelectedList();
+}
+
+var updateSelectedList = function() {
+  $('#selected-domains').empty();
+  $(selectedList).each(function(key, item){
+    $('#selected-domains')
+      .append('<span class="chip"><span>' + item + '&nbsp;&nbsp;</span><span class="remove" onClick="removeItem(' + key + ')">X' + '</span>');
+  });
+}
+
+$('.domain-item').on('click', function(){
+  selectedList.push($(this).html());
+  selectedList = $.unique(selectedList);
+  updateSelectedList();
+});
+
+$('#create-org').on('click', function(e) {
+  e.preventDefault();
+  var title = $('#orgName').val();
+  var location = $('#location').val();
+  var state = $('#state').val();
+  if(!(orgName && location)){
+    alert('Organization name and location fields are empty');
+    return;
+  }
+  var request = {
+  title: title,
+  location: location,
+  state: state,
+  selectedDomainList: selectedList.join(',')
+  };
+  $('#new-org-form').hide();
+  $('#disp-msg').append('<div class="alert alert-info" id="in-progress">' +
+  '<strong>You request is being processed. Please wait, it will be a while ...</strong></div>');
+  runService('addNewOnCampusOrg', request).then(function(response){
+    if(response) {
+       $('#in-progress').remove();
+       $('#disp-msg').append('<a class="pure-u-1" href="' + response.url + '" target="_blank">' + response.url + '</a>');
+     }
+  });
+});
+</script>

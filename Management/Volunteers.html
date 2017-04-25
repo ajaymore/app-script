@@ -1,0 +1,104 @@
+<div class="row" style="margin: 20px;">
+  <div style="margin-bottom: 20px;">
+    <form class="form-inline">
+      <div class="form-group">
+        <label class="sr-only" for="email-id" type="email">Email address</label>
+        <input type="email" class="form-control" id="email-id" placeholder="Email">
+      </div>
+      <div class="form-group">
+        <select id="volunteer-type" class="form-control">
+          <option value="comm">Comm or Logistics Volunteers</option>
+          <option value="tech">Tech Volunteer</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-default" id="add-volunteer">Add</button>
+    </form>
+  </div>
+  <!-- <table class="table">
+    <tbody id="volunteer-table">
+      <tr>
+        <th>Admins</th>
+        <th>Tech Volunteers</th>
+        <th>Comm and Logistic Volunteers</th>
+      </tr>
+    </tbody>
+  </table> -->
+  <div class="col-md-12">
+  <div class="col-md-4" style="margin-bottom: 20px;">
+  <h4 style="font-weight: bold;">Admins</h4>
+  <ol class="col-md-4" id="admin-list"></ol>
+  </div>
+  <div class="col-md-4" style="margin-bottom: 20px;">
+  <h4 style="font-weight: bold;">Tech Volunteers</h4>
+  <ol class="col-md-4" id="techie-list"></ol>
+  </div>
+  <div class="col-md-4" style="margin-bottom: 20px;">
+  <h4 style="font-weight: bold;">Comm and Logistic Volunteers</h4>
+  <ol class="col-md-4" id="commie-list"></ol>
+  </div>
+  </div>
+  <script>
+  var admins, techies, commies, maxSize;
+  $('#add-volunteer').on('click', function(e) {
+    e.preventDefault();
+    var email = $('#email-id').val().trim();
+    var type = $('#volunteer-type').val();
+    if (!email || !type)
+      alert('Please enter correct email Id');
+    runService('addVolunteer', {type: type, email: email, last: (type === 'tech' ? techies.length : commies.length)}).then(function(response) {
+    $('#email-id').val('');
+    fetchData();
+    });
+  });
+  function refreshUI() {
+//     $("#volunteer-table").html('<tr><th>Admins</th><th>Tech Volunteers</th><th>Comm and Logistic Volunteers</th></tr>');
+//     for(var i=0; i<maxSize; i++) {
+//     var row = '<tr>';
+//      row = row + '<td>' + (typeof admins[i] !== 'undefined' ? admins[i] : '') + '</td>';
+//      row = row + '<td>' + (typeof techies[i] !== 'undefined' ? techies[i] : '') + '</td>';
+//      row = row + '<td>' + (typeof commies[i] !== 'undefined' ? commies[i] : '') + '</td>';
+//     row = row + '</tr>';
+//       $("#volunteer-table").append(row);
+//       }
+       
+       $('#admin-list').empty();
+       $('#commie-list').empty();
+       $('#techie-list').empty();
+       admins.map(function(item){
+         $('#admin-list').append('<li>' + item + '</li>');
+       });
+       techies.map(function(item){
+         $('#techie-list').append('<li>' + item + '</li>');
+       });
+       commies.map(function(item){
+         $('#commie-list').append('<li>' + item + '</li>');
+       });
+     
+  }
+  
+  function fetchData() {
+    runService('getAllVolunteers').then(function(response) {
+    response.shift();
+    maxSize=response.length;
+    admins = [];
+    techies = [];
+    commies = [];
+    var volunteerMap = response.map(function(item) {
+      if (item[0]) {
+        admins.push(item[0]);
+      }
+      if (item[1]) {
+        techies.push(item[1]);
+      }
+      if (item[2]) {
+        commies.push(item[2]);
+      }
+    });
+    refreshUI();
+  });
+  }
+  
+  fetchData();
+  
+  </script>
+</div>

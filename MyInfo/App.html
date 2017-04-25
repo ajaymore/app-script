@@ -1,0 +1,64 @@
+<div class="pure-g" id="root">
+    <h3 class="pure-u-1">My Details</h3>
+    <div class="pure-u-1" id="course-info"></div>
+    <div class="pure-u-1"><h3 class="pure-u-1">Upload CV</h3></div>
+    <div class="pure-u-1">
+        <input name="myFile" id="myFile" type="file" accept="application/pdf,application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+    </div>
+    <button style="margin: 25px 0" id="form-submit" class="pure-button pure-button-primary">Upload</button>
+    <div id="progress" class="pure-u-1"></div>
+</div>
+    <script>
+        var appRoot = $('#root');
+var student = null;
+appRoot.append('<p id="initial-fetch" class="pure-u-1">Fetching information ...</p>');
+google.script.run.withSuccessHandler(function(response) {
+  if (response) {
+            $('#initial-fetch').remove();
+        var r = JSON.parse(response);
+    var r = r.data;
+    student = r;
+    $('#course-info').append('<div class="pure-u-1">' +
+    '<p>Admission ID: ' + r.admissionId + '</p>' +
+    '<p>Email: ' + r.email + '</p>' +
+    '<p>Name: ' + r.name + '</p>' +
+    '<p>Program: ' + r.program + '</p>' +
+    '<p>CV Uploaded: ' + r.cvUploaded + '</p>' +
+    '</div>');
+  }
+}).withFailureHandler(function(message) {
+            console.log(message);
+        $('#initial-fetch').remove();
+  $('.err-msg').append('<p class="pure-u-1">There was an error in processing your request!</p>');
+}).fetchMyDetails();
+
+var file,
+  reader = new FileReader();
+
+reader.onloadend = function(e) {
+            google.script.run
+                .withSuccessHandler(function (response) {
+                    $('#progress').html('<p style="color: green; font-style: italic">File uploaded successfully!</p>');
+                    $('#form-submit').prop('disabled', false);
+                })
+                .withFailureHandler(function (message) {
+                    console.log(message);
+                    appRoot.append('<p class="pure-u-1">We are experiencing some problem with this functionality, please contact your administrator!</p>');
+                })
+                .uploadCV(
+                e.target.result, JSON.stringify(student), file.name
+                );
+        };
+
+$('#form-submit').on('click', function(e) {
+            e.preventDefault();
+        file = $('#myFile')[0].files[0];
+  if(file && student) {
+            $('#progress').html("Uploading file ... may take some time!");
+        $('#form-submit').prop('disabled', true);
+    reader.readAsDataURL(file);
+  } else {
+            alert('please choose a document.');
+        }
+});
+</script>

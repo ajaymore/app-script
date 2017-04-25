@@ -1,0 +1,66 @@
+<div class="row" style="margin: 20px">
+<?
+var roles = getMyRoles(Session.getActiveUser().getEmail());        
+if(roles.admin || roles.commie) { ?>
+  <div id="news-message" class="alert alert-dismissible alert-success col-md-12" style="display: none;"></div>
+  <h1 class="col-md-12" style="padding: 0">Post a News</h1>
+  <form class="form-horizontal col-md-12" id="new-news-form">
+    <fieldset>
+      <div class="form-group">
+        <label for="news-title">News Title</label>
+        <input class="form-control" id="news-title" type="text" placeholder="News Title" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="news-description">Description</label>
+        <textarea class="form-control" rows="6" id="news-description" type="text" placeholder="Description" maxlength="300"></textarea>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="create-news">Post News</button>
+      </div>
+    </fieldset>
+  </form>
+ <? } ?>
+  <div class="col-md-12" style="padding: 0">
+  <? if(!(roles.admin || roles.commie || roles.techie)) { ?>
+  <div class="alert alert-info col-md-12">
+  <p>If you wish to volunteer with placement cell, please drop an email to <code>placements@apu.edu.in</code>
+  </p>
+  </div>
+  <? } ?>
+    <ul class="news-list list-group col-md-12" style="padding: 0"></ul>
+  </div>
+</div>
+<script>
+$('#create-news').on('click', function(e) {
+  e.preventDefault();
+  var title = $('#news-title').val();
+  var description = $('#news-description').val();
+  if (!(title && description)) {
+    alert('Title or Description cannot be empty');
+    return;
+  }
+  $('#news-message').show();
+  $('#news-message').html('You request is being processed. Please wait, it will be a while ...');
+  runService('insertNewItems', {
+    title: title,
+    description: description
+  }).then(function(response) {
+    if (response) {
+      $('#news-message').html('News Published!');
+      $('#news-title').val('');
+      $('#news-description').val('');
+    }
+  });
+});
+firebase.database().ref('/news-items').limitToLast(10).on('value', function(snapshot) {
+  if (!snapshot.val())
+    return;
+  var output = snapshot.val();
+  var keys = Object.keys(snapshot.val());
+  $('.news-list').empty();
+  keys.reverse();
+  keys.map(function(item) {
+    $('.news-list').append('<li class="list-group-item"><h4 class="list-group-item-heading" style="font-weight: bold;">' + output[item].title + '</h4><p class="list-group-item-text">' + output[item].description + '</p></li>');
+  });
+});
+</script>

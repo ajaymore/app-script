@@ -1,0 +1,134 @@
+<style>
+</style>
+<div style="margin: 20px">
+<p id="err-msg" class="alert alert-success" style="display: none;"></p>
+<h3 class="row">Create New Upload Entry</h3>
+<form class="row form-inline" id="new-entry" style="">
+      <div class="form-group">
+        <label class="sr-only" for="folder-name">Folder Name</label>
+        <input id="folder-name" class="form-control" type="text" placeholder="Folder Name">
+      </div>
+      <div class="form-group">
+        <label class="sr-only" for="visible-name">Visible Upload Name</label>
+        <input id="visible-name" class="form-control" type="text" placeholder="Visible Upload Name">
+      </div>
+      <div class="form-group">
+        <label class="sr-only" for="deadline-date">Deadline Date</label>
+        <input id="deadline-date" class="form-control" type="text" placeholder="dd-mm-yyyy" style="width: 130px">
+      </div>
+      <div class="form-group">
+        <label class="sr-only" for="deadline-time">Deadline Time</label>
+        <input id="deadline-time" class="form-control" type="text" placeholder="hh:mm" style="width: 100px">
+      </div>
+      <button type="submit" class="btn btn-primary" id="new-entry-submit">Submit</button>
+</form>
+</div>
+<div class="row">
+  <div id="initial-fetch" class="col-md-12 alert alert-success">Fetching information ...</div>
+  <div class="col-md-12">
+    <ul id="the-list" class="list-group"></ul>
+  </div>
+</div>
+<script>
+var validate = function(date, time) {
+  return !isNaN(parseInt(date.split('-').join(''))) && !isNaN(parseInt(time.split('-').join('')));
+}
+
+var update = function(index) {
+  var date = $('#date-' + index).val();
+  var time = $('#time-' + index).val();
+  if (!validate(date, time)) {
+    alert('Please enter correct values');
+    return;
+  }
+  $('#item-' + index).append('<p class="col-md-12 alert alert-info">Update in progress...</p>');
+  google.script.run.withSuccessHandler(function(response) {
+    if (response) {
+      buildUI(response)
+    }
+  }).withFailureHandler(function(message) {
+    console.log(message);
+    $('.err-msg').append('<p class="pure-u-1">There was an error in processing your request!</p>');
+  }).updateEntry(JSON.stringify({
+    id: index,
+    deadlineDate: date,
+    deadlineTime: time
+  }));
+
+}
+var buildUI = function(response) {
+  response.shift();
+  var uploadMap = response.map(function(item, key) {
+    return {
+      id: item[0],
+      folderName: item[1],
+      visibleName: item[2],
+      deadlineDate: item[3],
+      deadlineTime: item[4]
+    }
+  });
+  $('#the-list').empty();
+  $('#the-list').append(
+    '<li class="list-group-item col-md-12" style="font-weight: bold;">' +
+    '<p class="col-md-1">Id</p>' +
+    '<p class="col-md-2">Drive folder Name</p>' +
+    '<p class="col-md-3">Name visible in upload</p>' +
+    '<p class="col-md-2">Date</p>' +
+    '<p class="col-md-4">Time</p>' +
+    '</li>'
+  );
+  $(uploadMap).each(function(key, item) {
+    var listItem = '<li class="list-group-item col-md-12" id="item-' + item.id + '">' +
+      '<p class="col-md-1">' + item.id + '</p>' +
+      '<p class="col-md-2">' + item.folderName + '</p>' +
+      '<p class="col-md-3">' + item.visibleName + '</p>' +
+      '<p class="col-md-2"><input id="' + 'date-' + item.id + '" type="text" class="form-control" placeholder="dd-mm-yyyy"' +
+      'value="' + item.deadlineDate + '" max-length="9" min-length="9" /></p>' +
+      '<p class="col-md-4"><input id="' + 'time-' + item.id + '" type="text" class="form-control time-input" placeholder="hh:mm"' +
+      'value="' + item.deadlineTime + '" max-length="5" min-length="5" style="width: 100px; display: inline" />' +
+      '<button style="margin-left: 8px;" class="btn btn-default" onClick="update(' + item.id + ')">Update</button></p>' +
+      '</li>'
+    $('#the-list').append(listItem);
+  });
+}
+runService('getUploadEntries', {}).then(function(response){
+    if (response) {
+    $('#initial-fetch').remove();
+    buildUI(response);
+  }
+  });
+
+$('#new-entry-submit').on('click', function(e) {
+  e.preventDefault();
+  var r = {
+    folderName: $('#folder-name').val(),
+    visibleUploadName: $('#visible-name').val(),
+    deadlineDate: $('#deadline-date').val(),
+    deadlineTime: $('#deadline-time').val()
+  }
+
+  if (!(r.folderName && r.visibleUploadName)) {
+    alert('Enter correct values');
+    return;
+  }
+  $('#new-entry').hide();
+  $('#err-msg').show();
+  $('#err-msg').html('Creating a new entry, please wait ...');
+  google.script.run.withSuccessHandler(function(response) {
+    $('#err-msg').html('Entry is added and google drive folder is created. Scroll to the bottom to update the deadlines for this entry.');
+    $('#new-entry').show()
+    if (response) {
+      buildUI(response);
+      $('#folder-name').val(''),
+      $('#visible-name').val('');
+      $('#deadline-date').val('');
+      $('#deadline-time').val('');
+    }
+  }).withFailureHandler(function(message) {
+    console.log(message);
+    alert('There was an error in processing your request!');
+  }).addEntry(JSON.stringify(r));
+
+
+});
+</script>

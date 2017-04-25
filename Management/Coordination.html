@@ -1,0 +1,63 @@
+<div class="row">
+  <div style="margin: 20px 0;" class="col-md-12">
+    <select id="org-list-coordinate" class="form-control">
+    </select>
+  </div>
+  <form class="col-md-12" style="padding: 0;">
+  <div class="col-md-12" id="org-coordination-details" style="padding: 0;"></div>
+  <div class="col-md-12"><button id="save-coordination" class="btn btn-primary">Save Details</button></div>
+  </form>
+  <script>
+  var data = [],
+    config = [];
+  $('#coordination-anchor').on('shown.bs.tab', function(e) {
+    $("#org-list-coordinate").off();
+    var clonedOrg = $('#org-list').clone();
+    $('#org-list-coordinate').empty();
+    $('#org-list-coordinate').append(clonedOrg.children());
+    $('#org-list-coordinate').val('Choose');
+    $('#org-list-coordinate').on('change', function() {
+      data = [], config = [];
+      var value = $(this).val();
+      if (value === 'Choose') {
+        $('#org-coordination-details').empty();
+        return;
+      }
+      runService('getOrgCoordinationDetails', value).then(function(response) {
+        data = response.data;
+        config = response.config;
+        $('#org-coordination-details').empty();
+        config.map(function(item) {
+          var nodeElem = '<div class="form-group col-md-6">' +
+              '<label for="input-' + item.index + '">' + item.key + '</label>' +
+              '<textarea rows="6" class="form-control" id="input-' + item.index + '" placeholder="' + item.placeholder + '">' + data[item.index-1] +
+              '</textarea>' +
+              '</div>';
+          $('#org-coordination-details').append(nodeElem);
+        });
+      });      
+        $('#save-coordination').on('click', function(e) {
+          e.preventDefault();
+          console.log(data[0]);
+          var requestOutput = config.map(function(item) {
+            return $('#input-' + item.index).val();
+          });
+          runService('saveOrgCoordinationDetails', {updateIndex: data[0], array: requestOutput}).then(function(response) {
+          data = response.data;
+          config = response.config;
+          $('#org-coordination-details').empty();
+          config.map(function(item) {
+          console.log(item.index);
+          var nodeElem = '<div class="form-group col-md-6">' +
+          '<label for="input-' + item.index + '">' + item.key + '</label>' +
+          '<textarea rows="6" class="form-control" id="input-' + item.index + '" placeholder="' + item.placeholder + '">' + data[item.index-1] +
+          '</textarea>' +
+          '</div>';
+          $('#org-coordination-details').append(nodeElem);
+          });
+          }); 
+        });
+    });
+  });
+  </script>
+</div>

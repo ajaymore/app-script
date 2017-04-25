@@ -1,0 +1,128 @@
+<div class="row" style="margin: 20px;">
+<div style="margin-bottom: 20px;" class="col-md-12">
+<div class="col-md-4" style="margin-bottom: 20px;">
+<select id="org-list" class="form-control">
+  <option>Choose an organization</option>
+</select>
+</div>
+<div class="col-md-3" style="margin-bottom: 20px;">
+<input type="button" value="Select Entire list" class="btn btn-default" style="margin-right: 10px;"
+   onclick="selectElementContents( document.getElementById('table') );"></div>
+   <div class="col-md-5" style="margin-bottom: 20px;">Select and do <code>Ctrl + C</code> to copy.</div>
+</div>
+<h3 class="col-md-12" style="padding: 0; display: none;">Send a notification</h3>
+  <form class="form-horizontal col-md-12" id="new-notification-form" style="display: none;">
+    <fieldset>
+      <div class="form-group">
+        <label for="notification-title">Notification Title</label>
+        <input class="form-control" id="notification-title" type="text" placeholder="Notification Title" maxlength="100">
+      </div>
+      <div class="form-group">
+        <label for="notification-description">Description</label>
+        <textarea class="form-control" rows="3" id="notification-description" type="text" placeholder="Notification Description" maxlength="250"></textarea>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="create-notification">Send Notification</button>
+      </div>
+    </fieldset>
+  </form>
+<div class="row">
+<table class="table" id="table"><tbody id="applicant-table"><tr><th>Sr. No.</th><th>Email</th></tr></tbody></table>
+</div>
+</div>
+<script>
+$('#create-notification').on('click', function(e) {
+  e.preventDefault();
+  var title = $('#notification-title').val();
+  var description = $('#notification-description').val();
+  if (!(title && description)) {
+    alert('Title or Description cannot be empty');
+    return;
+  }
+  var applicants = $("#applicant-table tr td:nth-child(2)");
+  var ids = [];
+applicants.each(function() {
+  var email = $(this).html();
+  firebase.database().ref('/fcm-map').orderByChild('email')
+    .equalTo(email).once('value', function(snapshot) {
+      if (snapshot.val()) {
+        var device = snapshot.val();
+        var key = Object.keys(device)[0];
+        ids.push(device[key].token);
+  var request = {
+    title: title,
+    description: description,
+    ids: [device[key].token]
+  }
+        google.script.run
+        .withSuccessHandler(function(response) {
+          console.log('success!', email);
+        })
+        .withFailureHandler(function(message) {
+          console.log(message);
+        }).fcm_sender(JSON.stringify(request));
+      } else {
+        console.log(email + ' No Device found!');
+      }
+    });
+});
+
+  $('#notification-title').val('');
+  $('#notification-description').val('');
+  alert('notification sent!');
+return;
+  var request = {
+    title: title,
+    description: description,
+    ids: []
+  }
+  runService('fcm_sender', request).then(function(response) { 
+  $('#notification-title').val('');
+  $('#notification-description').val('');
+  });
+});
+$('#org-list').on('change', function() {
+  if($(this).val() === 'Choose') {
+    return;
+  }    
+  runService('getResumeList', $(this).val()).then(function(response){
+    $('#applicant-table').empty();
+    $('#applicant-table').append('<tr><th>Sr. No.</th><th>Email</th></tr>');
+    response.map(function(item, index) {
+      $('#applicant-table').append('<tr><td>' + (index + 1) + '</td><td>' + item + '</td></tr>');    
+    });
+  });
+});
+$('#applicant-list-anchor').on('shown.bs.tab', function (e) {
+  
+  });
+runService('getAllOrganizations').then(function(response){
+    $('#org-list').empty();
+    $('#org-list').append('<option value="Choose">Choose an organization</option>');
+    var orgList = response.map(function(item, index){
+      if(!index)
+        return;
+      $('#org-list').append('<option value="' + item[1] + '">' + item[1] + '</option>');
+      return item[1];
+    });
+})
+    function selectElementContents(el) {
+        var body = document.body, range, sel;
+        if (document.createRange && window.getSelection) {
+            range = document.createRange();
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            try {
+                range.selectNodeContents(el);
+                sel.addRange(range);
+            } catch (e) {
+                range.selectNode(el);
+                sel.addRange(range);
+            }
+        } else if (body.createTextRange) {
+            range = body.createTextRange();
+            range.moveToElementText(el);
+            range.select();
+        }
+    }
+</script>

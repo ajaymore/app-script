@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  -->
+  <?!= include('TwBootstrap') ?>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
+  <script>
+    var firebaseConfig = {
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    storageBucket: "",
+    messagingSenderId: ""
+    };
+    firebase.initializeApp(firebaseConfig);
+</script>
+<style>
+.blockUI h1 {
+margin: 0;
+    padding: 20px;
+    color: chocolate;
+    }
+</style>
+  <?!= include('ImportScripts') ?>
+</head>
+
+<body>
+  <div class="container">
+    <script>
+    function runService(fnName, request) {
+      $.blockUI({ css: { boxShadow: '0 1px 1px 0 rgba(0,0,0,.2)', backgroundColor: '#fff', border: '', borderRadius: '1px', boxSizing: 'border-box'} });
+      var deferred = $.Deferred();
+      google.script.run
+        .withSuccessHandler(function(response) {
+          $.unblockUI();
+          deferred.resolve(JSON.parse(response));
+        })
+        .withFailureHandler(function(message) {
+          $.unblockUI();
+          alert('We are facing some problems in processing your request!');
+          console.log(message);
+          deferred.reject(message);
+        })[fnName](JSON.stringify(request));
+      return deferred.promise();
+    }
+    </script>
+    <div>
+      <?
+        var roles = getMyRoles(Session.getActiveUser().getEmail());
+        
+      ?>
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#news" id="news-anchor" aria-controls="messages" role="tab" data-toggle="tab">News</a></li>
+        <? if(roles.admin || roles.techie) { ?>
+        <li role="presentation"><a id="tech-anchor" href="#tech" aria-controls="home" role="tab" data-toggle="tab">Tech</a></li>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <li role="presentation"><a href="#comm" id="comm-anchor" aria-controls="profile" role="tab" data-toggle="tab">Communication</a></li>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <li role="presentation"><a id="applicant-list-anchor" href="#applicant-list" aria-controls="applicant-list" role="tab" data-toggle="tab">Applicants</a></li>
+        <? } ?>
+        <? if(roles.admin || roles.techie) { ?>
+        <li role="presentation"><a href="#volunteers" id="vol-anchor" aria-controls="volunteers" role="tab" data-toggle="tab">Volunteers</a></li>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <li role="presentation"><a id="coordination-anchor" href="#coordination" aria-controls="coordination" role="tab" data-toggle="tab">Coordination</a></li>
+        <? } ?>
+      </ul>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="news">
+          <?!= include('News'); ?>
+        </div>
+        <? if(roles.admin || roles.techie) { ?>
+        <div role="tabpanel" class="tab-pane" id="tech">
+          <?!= include('Tech'); ?>
+        </div>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <div role="tabpanel" class="tab-pane" id="comm">
+          <?!= include('Comm'); ?>
+        </div>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <div role="tabpanel" class="tab-pane" id="applicant-list">
+          <?!= include('Applicants'); ?>
+        </div>
+        <? } ?>
+        <? if(roles.admin || roles.techie) { ?>
+        <div role="tabpanel" class="tab-pane" id="volunteers">
+          <?!= include('Volunteers'); ?>
+        </div>
+        <? } ?>
+        <? if(roles.admin || roles.commie) { ?>
+        <div role="tabpanel" class="tab-pane" id="coordination">
+          <?!= include('Coordination'); ?>
+        </div>
+        <? } ?>
+      </div>
+    </div>
+    <script>
+    </script>
+  </div>
+</body>
+
+</html>
