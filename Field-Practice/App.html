@@ -1,0 +1,41 @@
+<div id="map"></div>
+<script>
+google.script.run
+.withSuccessHandler(function(response) {
+  drawMap(response);
+})
+.withFailureHandler(function(message) {
+  console.log(message);
+})
+.getData();
+
+function drawMap(data) {
+  if(!data)
+    return;
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 12.9200, lng: 77.5990 },
+    zoom: 12
+  });
+  for(var i=0; i<data.length; i++) {
+    var row = data[i];
+    if(row.coordinates) {
+      var marker = new google.maps.Marker({
+        position: { lat: row.coordinates.lat, lng: row.coordinates.lng },
+        map: map
+      });
+    }
+  }
+  
+  var dataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAEPSURBVDhPjZEBlQMhDESxsBaq5SychVqohVpYC2uhFmIBC2uByycMsLT3XuHNhmRnBgipfDnOe6pYx1cGId4+mqT0sJKeK3I5z7OY47b7uhuEyTZzIb/DSnbxyRb+MbNmkqqhODVeko7IH684CWhezTRqywkQCZE/zQ2YTQAsB16OyWCIFCHNIq2DM/FjcUXdGYHPu1+DmvJtlxj8Y3BzEoKtNiwEtR8+fw/VGlaxftDtKznTvnJkr81PP4sRcV8IfgTaXXbTvXN7f5m2KDGJjo6YiBmm495E4WKgQuwSBhw4jBjv4g8GiNVtIm/9430YvZBQeTeIAkJ25SqAlO538iwUhoEwiDgcNLULVq6VP/io3VDPSWEfAAAAAElFTkSuQmCC";
+    
+  var apuPointer = new google.maps.Marker({
+    position: new google.maps.LatLng(12.862577, 77.664939),
+    icon: {
+            size: new google.maps.Size(220,220),
+            scaledSize: new google.maps.Size(24,24),
+            url: dataUrl,
+            anchor: new google.maps.Point(16,16)},
+    map: map
+  });
+}
+</script>

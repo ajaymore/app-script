@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello World</title>
+    <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }        
+    #map {
+      height: 100%;
+    }
+    </style>
+    <!-- <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script> -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJFpZ20iwC75uzyl0zfgajq2NFeju6vbI&callback=drawMap" async
+        defer></script>
+  </head>
+  <body>
+    <?!= include('App'); ?>
+  </body>
+</html>
