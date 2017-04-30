@@ -1,0 +1,136 @@
+<script>
+var setMessage = function(message, className) {
+    $('#message').text(message);
+    $('#message').removeClass();
+    $('#message').addClass(className);
+}
+
+var tableOneVisble = true;
+$('#table-two').hide();
+$('#toggle-booth-list').on('click', function() {
+  tableOneVisble = !tableOneVisble;
+  if(tableOneVisble) {
+    $('#table-two').hide();
+    $('#table-one').show();
+  } else {
+    $('#table-one').hide();
+    $('#table-two').show();  
+  }
+});
+
+var selectChange = function() {
+    var statusId = $(this).prop('id');
+    var prefix = statusId.substr(statusId.indexOf('-'));
+    var text = $('#status' + prefix).val();
+
+    if (text === 'Voted') {
+        $("#status" + prefix + " option").eq(1).prop('disabled', true);
+        $('#email' + prefix).prop('disabled', true);
+    } else {
+        $("#status" + prefix + " option").eq(1).prop('disabled', false);
+        $('#email' + prefix).prop('disabled', false);
+    }
+    if (text === 'Occupied') {
+        var email = $('#email' + prefix).val();
+        if (!email) {
+            setMessage('Email field cannot be left empty', 'danger');
+            $(this).val('Open');
+            return;
+        }
+        $('#status' + prefix).prop('disabled', true);
+        $('#btn' + prefix).prop('disabled', false);
+        $('#email' + prefix).prop('disabled', true);
+    } else {
+        $('#btn' + prefix).prop('disabled', true);
+    }
+    if (text === 'Open') {
+        $('#email' + prefix).val('');
+        $('#btn' + prefix).prop('disabled', true);
+    }
+};
+$('#status-bt1').on('change', selectChange);
+$('#status-bt2').on('change', selectChange);
+$('#status-bt3').on('change', selectChange);
+$('#status-bt4').on('change', selectChange);
+$('#status-bt5').on('change', selectChange);
+$('#status-bt6').on('change', selectChange);
+
+var setClicked = function() {
+    setMessage('', '');
+    var statusId = $(this).prop('id');
+    var prefix = statusId.substr(statusId.indexOf('-'));
+    var email = $('#email' + prefix).val();
+    var boothMap = { '-bt1': 'Booth One', '-bt2': 'Booth Two', '-bt3': 'Booth Three','-bt4': 'Booth Four', '-bt5': 'Booth Five', '-bt6': 'Booth Six' };
+    google.script.run.withSuccessHandler(function(response) {
+        var r = JSON.parse(response);
+        if (r.update === 'success') {
+            setMessage('Status Updated', 'success')
+        }else if (r.update === 'failed') {
+            setMessage('You have voted Already', 'danger');
+            $('#email' + prefix).val('');
+            $('#status' + prefix).val('Open');
+            $('#status' + prefix).prop('disabled', false);
+            $('#email' + prefix).prop('disabled', false);
+        }else {
+            setMessage('Request not completed', 'danger');
+            $('#email' + prefix).val('');
+            $('#status' + prefix).val('Open');
+            $('#status' + prefix).prop('disabled', false);
+            $('#email' + prefix).prop('disabled', false);
+        }
+    }).withFailureHandler(function(message) {
+        console.log({
+            'status': 'There was a problem in processing your request',
+            error: message
+        });
+    }).setStatus(JSON.stringify({
+        booth: boothMap[prefix],
+        data: [email, 'Occupied']
+    }));
+}
+$('#btn-bt1').on('click', setClicked);
+$('#btn-bt2').on('click', setClicked);
+$('#btn-bt3').on('click', setClicked);
+$('#btn-bt4').on('click', setClicked);
+$('#btn-bt5').on('click', setClicked);
+$('#btn-bt6').on('click', setClicked);
+
+$('#refresh-btn').on('click', function() {
+    setMessage('', '');
+    google.script.run.withSuccessHandler(function(response) {
+        var data = JSON.parse(response);
+        setServerStatus($('#email-bt1'), $('#status-bt1'), $('#btn-bt1'), data.BoothOne);
+        setServerStatus($('#email-bt2'), $('#status-bt2'), $('#btn-bt2'), data.BoothTwo);
+        setServerStatus($('#email-bt3'), $('#status-bt3'), $('#btn-bt3'), data.BoothThree);
+        setServerStatus($('#email-bt4'), $('#status-bt4'), $('#btn-bt4'), data.BoothFour);
+        setServerStatus($('#email-bt5'), $('#status-bt5'), $('#btn-bt5'), data.BoothFive);
+        setServerStatus($('#email-bt6'), $('#status-bt6'), $('#btn-bt6'), data.BoothSix);
+        setMessage('Booth Data Refreshed', 'success');
+    }).withFailureHandler(function(message) {
+        console.log({
+            'status': 'There was a problem in processing your request',
+            error: message
+        });
+    }).refreshStatus();
+});
+var setServerStatus = function(emailEle, optionsEle, btnEle, data) {
+    emailEle.val(data.email);
+    optionsEle.val(data.status);
+    if (data.status === 'Voted') {
+        optionsEle.children('option').eq(1).prop('disabled', true);
+        emailEle.prop('disabled', true);
+    } else {
+        optionsEle.children('option').eq(1).prop('disabled', false);
+        emailEle.prop('disabled', false);
+    }
+    if (data.status !== 'Occupied') {
+        optionsEle.prop('disabled', false);
+        emailEle.prop('disabled', false);
+        btnEle.prop('disabled', true);
+    } else {
+        optionsEle.prop('disabled', true);
+        emailEle.prop('disabled', true);
+        btnEle.prop('disabled', false);
+    }
+}
+</script>

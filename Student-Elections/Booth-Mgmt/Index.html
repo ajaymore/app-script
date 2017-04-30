@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <?!= include('jQuery'); ?>
+    <style>
+    .danger{color:red;}.success{color:green;}
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="message"></div>
+        <table id="table-one">
+            <tbody>
+                <tr>
+                    <td>Booth One</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt1">
+                    </td>
+                    <td>
+                        <select id="status-bt1">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt1" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Booth Two</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt2">
+                    </td>
+                    <td>
+                        <select id="status-bt2">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt2" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Booth Three</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt3">
+                    </td>
+                    <td>
+                        <select id="status-bt3">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt3" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table id="table-two">
+            <tbody>
+                <tr>
+                    <td>Booth Four</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt4">
+                    </td>
+                    <td>
+                        <select id="status-bt4">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt4" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Booth Five</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt5">
+                    </td>
+                    <td>
+                        <select id="status-bt5">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt5" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Booth Six</td>
+                    <td>
+                        <input type="email" placeholder="Email" id="email-bt6">
+                    </td>
+                    <td>
+                        <select id="status-bt6">
+                            <option>Open</option>
+                            <option>Occupied</option>
+                            <option disabled>Voted</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button id="btn-bt6" onClick="" disabled="true">Set</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            <button id="refresh-btn">Refresh</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="toggle-booth-list">Toggle Booth List</button>
+        </p>
+        <p id="display"></p>
+    </div>
+    <?!= include('App'); ?>
+</body>
+
+</html>
